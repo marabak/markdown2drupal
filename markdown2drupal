@@ -1,0 +1,32 @@
+#!/bin/bash
+
+while getopts k:h:f: flag
+do
+    case "${flag}" in
+        k) key=${OPTARG};;
+        h) host=${OPTARG};;
+        f) file=${OPTARG};;
+    esac
+done
+
+if [ ! $key ] || [ ! $host ] || [ ! $file ] ; then
+   echo -e "Three arguments needed : access-key (-k), host (-h) and markdown filename (-f):"
+   echo -e "Syntax: $0 -k <access-key> -h <host> -f <markdown filename>\n"
+   exit 1
+fi
+
+html=$(docker run --rm --volume "`pwd`:/data" --user `id -u`:`id -g` pandoc/latex $file -t html)
+html=$(readarray -t ARRAY <<< $html; IFS=''; echo "${ARRAY[*]}")
+content=$(docker run -i stedolan/jq -aRc <<< $html .)
+id=$(grep -e '<!-- nid:[[:digit:]]* -->' $file | sed 's/[^0-9]*//g')
+json=$(curl --location --request GET "https://$host/node/$id?_format=json" --header "api-key: $key")
+type=$(docker run -i stedolan/jq <<< $json '.type[0].target_id')
+
+dataRaw="{\"type\":$type,\"field_body\":[{\"value\":$content,\"format\":\"full_html\"}]}"
+
+result=$(curl --location --request PATCH "https://$host/node/$id?_format=json" \
+--header 'Accept: application/vnd.api+json' \
+--header 'Content-Type: application/json' \
+--header 'cache-control: no-cache' \
+--header "api-key: $key" \
+-d "$dataRaw")
