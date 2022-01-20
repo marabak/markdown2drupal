@@ -17,7 +17,7 @@ The creation of new nodes is out of scope.
 You must first create an empty node in your drupal site and get its id.
 You must then add this tag in your markdown file you want to send :
 
-`<!-- nid:[node_id] -->`
+`<!-- Nid: [node_id] -->`
 
 where **node_id** is the id of the node you want to update.
 
