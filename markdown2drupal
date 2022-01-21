@@ -15,7 +15,7 @@ if [ ! $key ] || [ ! $host ] || [ ! $file ] ; then
    exit 1
 fi
 
-html=$(docker run --rm --volume "`pwd`:/data" --user `id -u`:`id -g` pandoc/latex $file -t html)
+html=$(docker run --rm --volume "`pwd`:/data" --user `id -u`:`id -g` pandoc/latex --from=gfm $file -t html)
 html=$(readarray -t ARRAY <<< $html; IFS=''; echo "${ARRAY[*]}")
 content=$(docker run -i stedolan/jq -aRc <<< $html .)
 id=$(grep -e '<!-- Nid: [[:digit:]]* -->' $file | sed 's/[^0-9]*//g')
