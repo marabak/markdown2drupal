@@ -27,7 +27,7 @@ else
   json=$(curl --location --request GET "https://$host/node/$id?_format=json" --header "api-key: $key")
   type=$(docker run -i stedolan/jq <<< $json '.type[0].target_id')
 
-  dataRaw="{\"type\":$type,\"field_body\":[{\"value\":$content,\"format\":\"basic_html\"}]}"
+  dataRaw="{\"type\":$type,\"field_body\":[{\"value\":$content,\"format\":\"full_html\"}]}"
 
   result=$(curl --location --request PATCH "https://$host/node/$id?_format=json" \
   --header 'Accept: application/vnd.api+json' \
